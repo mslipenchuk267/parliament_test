@@ -1,0 +1,12 @@
+{
+  "name": "parliament",
+  "displayName": "parliament",
+  "expo": {
+    "name": "parliament",
+    "slug": "parliament",
+    "version": "1.0.0",
+    "assetBundlePatterns": [
+      "**/*"
+    ]
+  }
+}

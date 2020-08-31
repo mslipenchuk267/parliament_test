@@ -30,6 +30,10 @@ allprojects {
             // Android JSC is installed from npm
             url("$rootDir/../node_modules/jsc-android/dist")
         }
+        maven {
+            // required by react-native-ble-plx for background mode
+            url 'https://www.jitpack.io'
+        }
 
         google()
         jcenter()

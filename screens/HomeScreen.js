@@ -1,11 +1,18 @@
 import React from 'react'
 import { StyleSheet, Text, View, Button } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
+import { BleManager } from 'react-native-ble-plx';
+
+
+
 import * as userActions from '../store/actions/user';
 
 const HomeScreen = () => {
     const infectionStatus = useSelector(state => state.user.infectionStatus);
     const dispatch = useDispatch();
+
+    const bleManager = new BleManager()
+
     console.log("HomeScreen.js - Infection Status: " + infectionStatus)
 
     const handleSetInfected = () => {
@@ -18,6 +25,20 @@ const HomeScreen = () => {
 
     const handleSetExposed = () => {
         dispatch(userActions.setExposed());
+    }
+
+    const handleStartDeviceScan = () => {
+        bleManager.startDeviceScan(
+            null,
+            null,
+            (error, device) => {
+                console.log("Scanned a device: " + device)
+            }
+        );
+    }
+
+    const handleStopDeviceScan = () => {
+        bleManager.stopDeviceScan();
     }
 
     return (
@@ -34,7 +55,8 @@ const HomeScreen = () => {
                 <Button title="Set Status to Infected" onPress={handleSetInfected}/>
                 <Button title="Set Status to Uninfected" onPress={handleSetUninfected}/>
                 <Button title="Set Status to Exposed" onPress={handleSetExposed} />
-                <Button title="Scan Devices" />
+                <Button title="Start Device Scan" onPress={handleStartDeviceScan} />
+                <Button title="Stop Device Scan" onPress={handleStopDeviceScan} />
             </View>
         </View>
     )

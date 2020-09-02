@@ -1,9 +1,7 @@
 import React from 'react'
-import { StyleSheet, Text, View, Button } from 'react-native';
+import { StyleSheet, Text, View, Button, PermissionsAndroid } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
 import { BleManager } from 'react-native-ble-plx';
-
-
 
 import * as userActions from '../store/actions/user';
 
@@ -30,16 +28,46 @@ const HomeScreen = () => {
     const handleStartDeviceScan = () => {
         bleManager.startDeviceScan(
             null,
-            null,
+            { allowDuplicates: false },
             (error, device) => {
-                console.log("Scanned a device: " + device)
+                if (device != null) {
+                    console.log("Scanned a device: " + device.name + " " + device.id)
+                    //console.log(JSON.stringify(device, getCircularReplacer()));    
+                }
             }
         );
     }
 
+    // Use this if we want to parse the device object. 
+    //  Need this because the device object is a cyclic structure
+    const getCircularReplacer = () => {
+        const seen = new WeakSet();
+        return (key, value) => {
+        if (typeof value === "object" && value !== null) {
+            if (seen.has(value)) {
+                return;
+            }
+            seen.add(value);
+        }
+        return value;
+        };
+    };
+
     const handleStopDeviceScan = () => {
         bleManager.stopDeviceScan();
     }
+
+    // Needs to run once so android can use BLE
+    const granted = PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+        {
+            title: 'Permission Localisation Bluetooth',
+            message: 'Requirement for Bluetooth',
+            buttonNeutral: 'Later',
+            buttonNegative: 'Cancel',
+            buttonPositive: 'OK',
+        }
+    );
 
     return (
         <View style={styles.container}>

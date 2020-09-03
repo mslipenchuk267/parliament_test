@@ -32,15 +32,16 @@ const HomeScreen = () => {
         bleManager.startDeviceScan(
             null,
             { allowDuplicates: false },
-            (error, device) => {
+            async (error, device) =>  {
                 if (error) {
                     console.log(error)
                 }
                 if (device) {
                     // Note that device.id returns the MAC address on Android, and UUID on iOS
-                    console.log("Scanned a device: " + device.name + " " + device.id)
+                    console.log("Scanned a device: " + device.id)
+                    let deviceName = device.name ? device.name : "n/a"
                     //console.log(JSON.stringify(device, getCircularReplacer())); 
-                    let newDevice = new Device(device.id, device.name)
+                    let newDevice = new Device(device.id, deviceName)
                     dispatch(userActions.addScannedDevice(newDevice));
                     return; // after adding device scan next device.
                 }
@@ -61,7 +62,7 @@ const HomeScreen = () => {
         dispatch(userActions.clearScannedDevices());
     }
 
-    // Use this if we want to parse the device object. 
+    // Use this if we want to parse the scanned device object. 
     //  Need this because the device object is a cyclic structure
     const getCircularReplacer = () => {
         const seen = new WeakSet();
@@ -83,6 +84,7 @@ const HomeScreen = () => {
     // Needs to run once on start so android can use BLE
     useEffect(() => {
         if (Platform.OS === 'android') {
+            // (TODO) lets use require variable to be true for device scanning or advertising to execute
             const granted = PermissionsAndroid.request(
                 PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
                 {
@@ -98,14 +100,17 @@ const HomeScreen = () => {
 
     return (
         <SafeAreaView style={styles.container}>
+
             <View style={styles.titleContainer}>
                 <Text style={styles.titleText}>Parliament</Text>
                 <Text style={styles.bodyText}>Anonymous Contact Tracing</Text>
             </View>
+
             <View style={styles.textContainer}>
                 <Text style={styles.bodyText}>User ID: [UUID]</Text>
                 <Text style={styles.bodyText}>User Status: {infectionStatus}</Text>
             </View>
+
             <View style={styles.userStatusButtonContainer}>
                 <View style={styles.userStatusButtons} >
                     <Button title="Infected" onPress={handleSetInfected} />
@@ -117,6 +122,7 @@ const HomeScreen = () => {
                     <Button title="Exposed" onPress={handleSetExposed} />
                 </View>
             </View>
+
             <View style={styles.bluetoothButtonsContainer}>
                 <View>
                     <Text style={styles.bluetoothSectionTitle} >Scanning</Text>
@@ -137,10 +143,12 @@ const HomeScreen = () => {
                     </View>
                 </View>
             </View>
+
             <View style={styles.scannedDevicesHeaderContainer}>
                 <Text>Scanned Devices: </Text>
                 <Button title="Clear" onPress={handleClearScannedDevices} />
             </View>
+
             <View style={styles.scannedDevicesContainer}>
                 <FlatList
                     data={scannedDevices}
@@ -151,6 +159,7 @@ const HomeScreen = () => {
                     )}
                 />
             </View>
+
         </SafeAreaView>
     )
 }

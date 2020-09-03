@@ -38,7 +38,7 @@ const HomeScreen = () => {
                 }
                 if (device) {
                     // Note that device.id returns the MAC address on Android, and UUID on iOS
-                    console.log("Scanned a device: " + device.id)
+                    console.log("HomeScreen.js/handleStartDeviceScan()/bleManager.startDeviceScan() - Scanned a device: " + device.id)
                     let deviceName = device.name ? device.name : "n/a"
                     //console.log(JSON.stringify(device, getCircularReplacer())); 
                     let newDevice = new Device(device.id, deviceName)

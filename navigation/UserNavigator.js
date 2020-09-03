@@ -11,6 +11,9 @@ export const HomeNavigator = () => {
             <HomeStackNavigator.Screen 
                 name="Home"
                 component = {HomeScreen}
+                options={{
+                    headerShown: false
+                }}
             />
         </HomeStackNavigator.Navigator>
     )

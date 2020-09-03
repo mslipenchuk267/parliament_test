@@ -1,17 +1,20 @@
-import React, { useEffect } from 'react'
-import { StyleSheet, Text, View, Button, PermissionsAndroid, Platform } from 'react-native';
+import React, { useEffect, useState } from 'react'
+import { StyleSheet, Text, View, Button, PermissionsAndroid, Platform, FlatList, SafeAreaView } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
 import { BleManager } from 'react-native-ble-plx';
 
 import * as userActions from '../store/actions/user';
+import Device from '../models/device';
 
 const HomeScreen = () => {
+    const scannedDevices = useSelector(state => state.user.scannedDevices);
     const infectionStatus = useSelector(state => state.user.infectionStatus);
     const dispatch = useDispatch();
 
-    const bleManager = new BleManager()
+    const bleManager = new BleManager();
 
-    console.log("HomeScreen.js - Infection Status: " + infectionStatus)
+    //console.log("HomeScreen.js - Infection Status: " + infectionStatus)
+    //console.log("HomeScreen.js - Scanned Devices: " + scannedDevices)
 
     const handleSetInfected = () => {
         dispatch(userActions.setInfected());
@@ -30,13 +33,32 @@ const HomeScreen = () => {
             null,
             { allowDuplicates: false },
             (error, device) => {
-                if (device != null) {
+                if (error) {
+                    console.log(error)
+                }
+                if (device) {
                     // Note that device.id returns the MAC address on Android, and UUID on iOS
                     console.log("Scanned a device: " + device.name + " " + device.id)
-                    //console.log(JSON.stringify(device, getCircularReplacer()));    
+                    //console.log(JSON.stringify(device, getCircularReplacer())); 
+                    let newDevice = new Device(device.id, device.name)
+                    dispatch(userActions.addScannedDevice(newDevice));
+                    return; // after adding device scan next device.
                 }
+                
             }
         );
+    }
+
+    const handleStartAdvertising = () => {
+
+    }
+
+    const handleStopAdvertising = () => {
+
+    }
+
+    const handleClearScannedDevices = () => {
+        dispatch(userActions.clearScannedDevices());
     }
 
     // Use this if we want to parse the device object. 
@@ -44,13 +66,13 @@ const HomeScreen = () => {
     const getCircularReplacer = () => {
         const seen = new WeakSet();
         return (key, value) => {
-        if (typeof value === "object" && value !== null) {
-            if (seen.has(value)) {
-                return;
+            if (typeof value === "object" && value !== null) {
+                if (seen.has(value)) {
+                    return;
+                }
+                seen.add(value);
             }
-            seen.add(value);
-        }
-        return value;
+            return value;
         };
     };
 
@@ -58,9 +80,7 @@ const HomeScreen = () => {
         bleManager.stopDeviceScan();
     }
 
-    // Needs to run once so android can use BLE
-    
-
+    // Needs to run once on start so android can use BLE
     useEffect(() => {
         if (Platform.OS === 'android') {
             const granted = PermissionsAndroid.request(
@@ -77,7 +97,7 @@ const HomeScreen = () => {
     }, []);
 
     return (
-        <View style={styles.container}>
+        <SafeAreaView style={styles.container}>
             <View style={styles.titleContainer}>
                 <Text style={styles.titleText}>Parliament</Text>
                 <Text style={styles.bodyText}>Anonymous Contact Tracing</Text>
@@ -86,14 +106,52 @@ const HomeScreen = () => {
                 <Text style={styles.bodyText}>User ID: [UUID]</Text>
                 <Text style={styles.bodyText}>User Status: {infectionStatus}</Text>
             </View>
-            <View>
-                <Button title="Set Status to Infected" onPress={handleSetInfected}/>
-                <Button title="Set Status to Uninfected" onPress={handleSetUninfected}/>
-                <Button title="Set Status to Exposed" onPress={handleSetExposed} />
-                <Button title="Start Device Scan" onPress={handleStartDeviceScan} />
-                <Button title="Stop Device Scan" onPress={handleStopDeviceScan} />
+            <View style={styles.userStatusButtonContainer}>
+                <View style={styles.userStatusButtons} >
+                    <Button title="Infected" onPress={handleSetInfected} />
+                </View>
+                <View style={styles.userStatusButtons} >
+                    <Button title="Uninfected" onPress={handleSetUninfected} />
+                </View>
+                <View style={styles.userStatusButtons} >
+                    <Button title="Exposed" onPress={handleSetExposed} />
+                </View>
             </View>
-        </View>
+            <View style={styles.bluetoothButtonsContainer}>
+                <View>
+                    <Text style={styles.bluetoothSectionTitle} >Scanning</Text>
+                    <View style={styles.userStatusButtons} >
+                        <Button title="Start Device Scan" onPress={handleStartDeviceScan} />
+                    </View>
+                    <View style={styles.userStatusButtons} >
+                        <Button title="Stop Device Scan" onPress={handleStopDeviceScan} />
+                    </View>
+                </View>
+                <View>
+                    <Text style={styles.bluetoothSectionTitle} >Advertising</Text>
+                    <View style={styles.userStatusButtons} >
+                        <Button title="Start Advertising" onPress={handleStartAdvertising} />
+                    </View>
+                    <View style={styles.userStatusButtons} >
+                        <Button title="Stop Advertising" onPress={handleStopAdvertising} />
+                    </View>
+                </View>
+            </View>
+            <View style={styles.scannedDevicesHeaderContainer}>
+                <Text>Scanned Devices: </Text>
+                <Button title="Clear" onPress={handleClearScannedDevices} />
+            </View>
+            <View style={styles.scannedDevicesContainer}>
+                <FlatList
+                    data={scannedDevices}
+                    legacyImplementation={true}
+                    keyExtractor={(item) => item.id}
+                    renderItem={({ item }) => (
+                        <Text style={styles.scannedDevicesText}>{item.id}</Text>
+                    )}
+                />
+            </View>
+        </SafeAreaView>
     )
 }
 
@@ -107,7 +165,29 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
     },
     titleContainer: {
-        paddingBottom: '10%',
+        paddingVertical: '5%',
+        alignItems: 'center'
+    },
+    userStatusButtonContainer: {
+        flexDirection: 'row'
+    },
+    bluetoothButtonsContainer: {
+        paddingTop: 5,
+        flexDirection: 'row',
+    },
+    scannedDevicesHeaderContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingTop: '3%',
+        paddingBottom: '2%',
+        justifyContent: 'space-between'
+    },
+    scannedDevicesContainer: {
+        borderColor: 'grey',
+        borderWidth: 2,
+        borderRadius: 5,
+        width: '80%',
+        height: '25%',
         alignItems: 'center'
     },
     textContainer: {
@@ -117,10 +197,32 @@ const styles = StyleSheet.create({
     titleText: {
         fontFamily: "Helvetica",
         fontWeight: "bold",
-        fontSize: 32
+        fontSize: 32,
+        color: 'black'
     },
     bodyText: {
         fontFamily: "Helvetica",
-        fontSize: 16
+        fontSize: 16,
+        color: 'black'
+    },
+    scannedDevicesText: {
+        fontFamily: "Helvetica",
+        fontSize: 12,
+        color: 'black',
+        paddingHorizontal: 20,
+        paddingVertical: 2
+    },
+    bluetoothSectionTitle: {
+        textAlign: 'center',
+        fontFamily: "Helvetica",
+        fontSize: 16,
+        color: 'black'
+    },
+    userStatusButtons: {
+        paddingHorizontal: 5,
+        paddingVertical: 5
+    },
+    bluetoothButtons: {
+        paddingVertical: 5
     }
 });

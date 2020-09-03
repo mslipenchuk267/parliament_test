@@ -6,12 +6,17 @@ import { BleManager } from 'react-native-ble-plx';
 import * as userActions from '../store/actions/user';
 import Device from '../models/device';
 
+// must not create this in a component!
+//  if you do the iOS bluetooth behaves really weird
+//   - Bluetooth radio will randomly stop scanning
+const bleManager = new BleManager();
+
+
 const HomeScreen = () => {
     const scannedDevices = useSelector(state => state.user.scannedDevices);
     const infectionStatus = useSelector(state => state.user.infectionStatus);
     const dispatch = useDispatch();
 
-    const bleManager = new BleManager();
 
     //console.log("HomeScreen.js - Infection Status: " + infectionStatus)
     //console.log("HomeScreen.js - Scanned Devices: " + scannedDevices)
@@ -31,23 +36,26 @@ const HomeScreen = () => {
     const handleStartDeviceScan = () => {
         bleManager.startDeviceScan(
             null,
-            { allowDuplicates: false },
+            { allowDuplicates: true }, // set this to true because we are keeping track of duplicates ourselves
             async (error, device) =>  {
                 if (error) {
                     console.log(error)
-                }
-                if (device) {
+                } else {
                     // Note that device.id returns the MAC address on Android, and UUID on iOS
                     console.log("HomeScreen.js/handleStartDeviceScan()/bleManager.startDeviceScan() - Scanned a device: " + device.id)
                     let deviceName = device.name ? device.name : "n/a"
                     //console.log(JSON.stringify(device, getCircularReplacer())); 
                     let newDevice = new Device(device.id, deviceName)
-                    dispatch(userActions.addScannedDevice(newDevice));
+                    await dispatch(userActions.addScannedDevice(newDevice));
                     return; // after adding device scan next device.
                 }
-                
+                return;
             }
         );
+    }
+
+    const handleStopDeviceScan = () => {
+        bleManager.stopDeviceScan();
     }
 
     const handleStartAdvertising = () => {
@@ -76,10 +84,6 @@ const HomeScreen = () => {
             return value;
         };
     };
-
-    const handleStopDeviceScan = () => {
-        bleManager.stopDeviceScan();
-    }
 
     // Needs to run once on start so android can use BLE
     useEffect(() => {

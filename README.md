@@ -1,23 +1,19 @@
 # Parliament - Anonymous Contact Tracing
 
 ## Environment Setup
----
 Follow the [React Native Environment Setup Guide](https://reactnative.dev/docs/environment-setup) and make sure to select the the **React Native CLI Quickstart** tab.
 __*Note*__: A Mac is required to build app to iOS devices and use the iOS simulator.
 
 ## Project Setup
----
 1. `cd` into project directory
 2. Run `yarn install`
 
 ## Running App on Simulator
----
 - Make sure you are in project root directory (e.g. `/parliament`)
 - **Android**: Run `npx react-native run-android`
 - **iOS (Mac required)**: Run `npx react-native run-ios`
 
 ## Running on Physical Device
----
 #### First Time Setup
 - Plug device into laptop via USB
 - **Android**: 

@@ -62,6 +62,11 @@ const HomeScreen = () => {
 
     const handleStartAdvertising = () => {
         if (Platform.OS === 'android') {
+            // this check helps prevent multiple 
+            //  advertisement beacons being created for the same device
+            if (BLEPeripheral.isAdvertising()) {
+                BLEPeripheral.stop()
+            }
             //BLEPeripheral.addService('047bc1be-b2b6-46bc-8c97-1f1ea52a30ca', true) //for primary service
             //BLEPeripheral.addCharacteristicToService('047bc1be-b2b6-46bc-8c97-1f1ea52a30ca', 'a5f00b05-00ad-429d-9fd1-2d8e0cc45d0c', 16 | 1, 8) //this is a Characteristic with read and write permissions and notify property
             BLEPeripheral.setName('RNBLETEST')

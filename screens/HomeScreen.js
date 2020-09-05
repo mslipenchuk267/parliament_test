@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { StyleSheet, Text, View, Button, PermissionsAndroid, Platform, FlatList, SafeAreaView } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
 import { BleManager } from 'react-native-ble-plx';
+import BLEPeripheral from 'react-native-ble-peripheral';
 
 import * as userActions from '../store/actions/user';
 import Device from '../models/device';
@@ -12,11 +13,12 @@ import Device from '../models/device';
 const bleManager = new BleManager();
 
 
+
+
 const HomeScreen = () => {
     const scannedDevices = useSelector(state => state.user.scannedDevices);
     const infectionStatus = useSelector(state => state.user.infectionStatus);
     const dispatch = useDispatch();
-
 
     //console.log("HomeScreen.js - Infection Status: " + infectionStatus)
     //console.log("HomeScreen.js - Scanned Devices: " + scannedDevices)
@@ -33,11 +35,11 @@ const HomeScreen = () => {
         dispatch(userActions.setExposed());
     }
 
-    const handleStartDeviceScan = () => {
+    const handleStartDeviceScan = async () => {
         bleManager.startDeviceScan(
             null,
             { allowDuplicates: true }, // set this to true because we are keeping track of duplicates ourselves
-            async (error, device) =>  {
+            async (error, device) => {
                 if (error) {
                     console.log(error)
                 } else {
@@ -59,11 +61,24 @@ const HomeScreen = () => {
     }
 
     const handleStartAdvertising = () => {
+        if (Platform.OS === 'android') {
+            //BLEPeripheral.addService('047bc1be-b2b6-46bc-8c97-1f1ea52a30ca', true) //for primary service
+            //BLEPeripheral.addCharacteristicToService('047bc1be-b2b6-46bc-8c97-1f1ea52a30ca', 'a5f00b05-00ad-429d-9fd1-2d8e0cc45d0c', 16 | 1, 8) //this is a Characteristic with read and write permissions and notify property
+            BLEPeripheral.setName('RNBLETEST')
 
+            BLEPeripheral.start()
+                .then(res => {
+                    console.log(res)
+                }).catch(error => {
+                    console.log(error)
+                })
+        }
     }
 
     const handleStopAdvertising = () => {
-
+        if (Platform.OS === 'android') {
+            BLEPeripheral.stop()
+        }
     }
 
     const handleClearScannedDevices = () => {
@@ -159,7 +174,7 @@ const HomeScreen = () => {
                     legacyImplementation={true}
                     keyExtractor={(item) => item.id}
                     renderItem={({ item }) => (
-                        <Text style={styles.scannedDevicesText}>{item.id}</Text>
+                        <Text style={styles.scannedDevicesText}>{item.name}{" "}{item.id}</Text>
                     )}
                 />
             </View>

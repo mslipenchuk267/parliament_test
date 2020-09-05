@@ -6544,6 +6544,11 @@ react-native-appearance@~0.3.3:
     invariant "^2.2.4"
     use-subscription "^1.0.0"
 
+react-native-ble-peripheral@^2.0.1:
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/react-native-ble-peripheral/-/react-native-ble-peripheral-2.0.1.tgz#54d170fc16df39dbb3ff345374b327705f662f77"
+  integrity sha512-pppFZZS41bZn/Eb4l3dAAjPS+RrYIraB4WF/rTBbU+GLCRFtzgheZAtQMydIH0oKZm8Ope4zWeGr1TKFbFz5Jg==
+
 react-native-ble-plx@^2.0.1:
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/react-native-ble-plx/-/react-native-ble-plx-2.0.1.tgz#0131a8c0b92be3f0bca51012715ac7814e08e022"

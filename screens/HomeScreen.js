@@ -3,7 +3,7 @@ import { StyleSheet, Text, View, Button, PermissionsAndroid, Platform, FlatList,
 import { useSelector, useDispatch } from 'react-redux';
 import { BleManager } from 'react-native-ble-plx';
 import BLEPeripheral from 'react-native-ble-peripheral';
-
+import BLEPeripheraliOS from 'react-native-peripheral';
 import * as userActions from '../store/actions/user';
 import Device from '../models/device';
 
@@ -77,12 +77,20 @@ const HomeScreen = () => {
                 }).catch(error => {
                     console.log(error)
                 })
+        } else {
+            BLEPeripheraliOS.startAdvertising({
+                name: 'My BLE device',
+              });
         }
     }
 
     const handleStopAdvertising = () => {
         if (Platform.OS === 'android') {
             BLEPeripheral.stop()
+        } else {
+            if (BLEPeripheraliOS.isAdvertising()) {
+                BLEPeripheraliOS.stopAdvertising();
+            }
         }
     }
 

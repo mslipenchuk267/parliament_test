@@ -78,9 +78,11 @@ const HomeScreen = () => {
                     console.log(error)
                 })
         } else {
-            BLEPeripheraliOS.startAdvertising({
-                name: 'My BLE device',
-              });
+            if (!BLEPeripheraliOS.isAdvertising()) {
+                BLEPeripheraliOS.startAdvertising({
+                    name: 'My BLE device',
+                });
+            }
         }
     }
 

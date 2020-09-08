@@ -22,8 +22,7 @@ __*Note*__: A Mac is required to build app to iOS devices and use the iOS simula
     - Run `npx react-native run-android` in terminal (make sure you are in project dir)
         - This will build the app and install it on your phone, it will automatically launch when ready 
 - **iOS**: 
-    - Open the `/ios` folder in `/parliament`
-    - Open `parliament.xcworkspace` file
+    - Run `xed -b ios` in project directory
         - this will open up xcode for you
     - In Xcode, go to Product -> Destination -> Select iPhone in the Device section 
         - (iPhone corresponds to your physical device, yours might have sligtly different name e.g. Matt's iPhone)
